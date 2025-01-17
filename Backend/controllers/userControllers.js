@@ -9,61 +9,157 @@ const path = require('path');
 const axios = require('axios');
 const fs = require('fs');
 
+const validator = require("validator"); // For validation and sanitation
+
 const createUser = async (req, res) => {
-  // 1. Check incoming data
-  console.log(req.body);
-
-  // 2. DesStructure the incoming data
-  const { fullName, phoneNumber, email, password } = req.body;
-
-  // 3. Validate the data (if empty, stop the process and send response)
-  if (!fullName || !phoneNumber || !email || !password) {
-    // res.send("Please enter all fields");
-    return res.status(400).json({
-      success: false,
-      message: 'Please enter all fields!',
-    });
-  }
-
-  // 4. Error Handling(try catch)
   try {
-    // 5. Check if the user is already registered
-    const existingUser = await userModel.findOne({ email: email });
+    // 1. Log incoming data (sanitized for safety)
+    console.log("Incoming request:", req.body);
 
-    if (existingUser) {
-      return res.json({
+    // 2. Destructure the incoming data and sanitize inputs
+    const { fullName, phoneNumber, email, password } = req.body;
+
+    // Validate inputs (check for null, type, and format)
+    if (!fullName || !phoneNumber || !email || !password) {
+      return res.status(400).json({
         success: false,
-        message: 'User Already Exists',
+        message: "Please provide all required fields!",
       });
     }
 
-    // Hash the password
-    const randomSalt = await bcrypt.genSalt(10);
+    // Ensure no malicious or invalid data is passed
+    if (!validator.isLength(fullName, { min: 3, max: 50 })) {
+      return res.status(400).json({
+        success: false,
+        message: "Full name must be between 3 and 50 characters!",
+      });
+    }
+
+    if (!validator.isMobilePhone(phoneNumber, "any", { strictMode: true })) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid phone number format!",
+      });
+    }
+
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email address!",
+      });
+    }
+
+    if (
+      !validator.isStrongPassword(password, {
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+      })
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Password must be strong (min 8 chars, including uppercase, lowercase, number, and symbol)!",
+      });
+    }
+
+    // 3. Check for existing user by email
+    const existingUser = await userModel.findOne({
+      email: validator.escape(email),
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User with this email already exists!",
+      });
+    }
+
+    // 4. Hash the password with a strong hashing algorithm (bcrypt)
+    const randomSalt = await bcrypt.genSalt(12); // Using 12 rounds for better security
     const hashedPassword = await bcrypt.hash(password, randomSalt);
 
-    // 5.2 if user is new
+    // 5. Create a new user and sanitize fields before saving
     const newUser = new userModel({
-      fullName: fullName,
-      phoneNumber: phoneNumber,
-      email: email,
+      fullName: validator.escape(fullName),
+      phoneNumber: validator.escape(phoneNumber),
+      email: validator.normalizeEmail(email),
       password: hashedPassword,
     });
-    // Save to database
+
     await newUser.save();
 
-    // Send the response
+    // 6. Send success response
     res.status(201).json({
       success: true,
-      message: 'User Created Successfully',
+      message: "User registered successfully!",
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error during user registration:", error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: "Internal server error",
     });
   }
 };
+
+
+//   // 1. Check incoming data
+//   console.log(req.body);
+
+//   // 2. DesStructure the incoming data
+//   const { fullName, phoneNumber, email, password } = req.body;
+
+//   // 3. Validate the data (if empty, stop the process and send response)
+//   if (!fullName || !phoneNumber || !email || !password) {
+//     // res.send("Please enter all fields");
+//     return res.status(400).json({
+//       success: false,
+//       message: 'Please enter all fields!',
+//     });
+//   }
+
+//   // 4. Error Handling(try catch)
+//   try {
+//     // 5. Check if the user is already registered
+//     const existingUser = await userModel.findOne({ email: email });
+
+//     if (existingUser) {
+//       return res.json({
+//         success: false,
+//         message: 'User Already Exists',
+//       });
+//     }
+
+//     // Hash the password
+//     const randomSalt = await bcrypt.genSalt(10);
+//     const hashedPassword = await bcrypt.hash(password, randomSalt);
+
+//     // 5.2 if user is new
+//     const newUser = new userModel({
+//       fullName: fullName,
+//       phoneNumber: phoneNumber,
+//       email: email,
+//       password: hashedPassword,
+//     });
+//     // Save to database
+//     await newUser.save();
+
+//     // Send the response
+//     res.status(201).json({
+//       success: true,
+//       message: 'User Created Successfully',
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Internal server error',
+//     });
+//   }
+// };
 
 const loginUser = async (req, res) => {
   // 1. Check incoming data
