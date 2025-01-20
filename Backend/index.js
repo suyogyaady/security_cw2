@@ -7,6 +7,8 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 const https = require("https");
+const mongoSanitize = require("express-mongo-sanitize");
+const xssClean = require("xss-clean");
 
 // const http = require("http");
 
@@ -23,6 +25,10 @@ app.use(cors(corsOptions));
 
 // Express Json Config
 app.use(express.json());
+
+app.use(mongoSanitize());
+
+app.use(xssClean());
 
 app.use(acceptFormData());
 
