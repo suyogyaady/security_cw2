@@ -127,32 +127,52 @@ const loginUser = async (req, res) => {
   // 1. Check incoming data
   console.log(req.body);
 
-  // 2. DesStructure the incoming data
-  const { email, password } = req.body;
+  // 2. Destructure the incoming data
+  const { email, password, recaptchaToken } = req.body;
 
   // 3. Validate the data (if empty, stop the process and send response)
-  if (!email || !password) {
+  if (!email || !password || !recaptchaToken) {
     return res.status(400).json({
       success: false,
-      message: "Please enter all fields!",
+      message: "Please provide all required fields!",
     });
   }
-  try {
-    // 4. Check if the user is already registered
-    const user = await userModel.findOne({ email: email });
-    // found data: fullName, phoneNumber, email, password
 
-    // 4.1 if user not found: Send response
+  try {
+    // 4. Validate reCAPTCHA token
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY; // Use secret key from .env
+    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
+
+    // Verify token with Google's API
+    const recaptchaResponse = await axios.post(verifyUrl, null, {
+      params: {
+        secret: secretKey,
+        response: recaptchaToken,
+      },
+    });
+
+    if (!recaptchaResponse.data.success) {
+      return res.status(400).json({
+        success: false,
+        message: "reCAPTCHA verification failed!",
+      });
+    }
+
+    // 5. Check if the user is already registered
+    const user = await userModel.findOne({ email: email });
+
+    // 5.1 If user not found: Send response
     if (!user) {
       return res.status(400).json({
         success: false,
         message: "User not found",
       });
     }
-    // 4.2 if user found
-    // 5. Check if the password is correct
+
+    // 5.2 If user found, check if the password is correct
     const passwordCorrect = await bcrypt.compare(password, user.password);
-    // 5.1 if password is wrong: Send response
+
+    // 5.3 If password is wrong: Send response
     if (!passwordCorrect) {
       return res.status(400).json({
         success: false,
@@ -160,14 +180,13 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // 5.2 if password is correct
-
-    // Token (generate -user data and key)
+    // 6. Generate token (user data and secret key)
     const token = await jwt.sign(
       { id: user._id, isAdmin: user.isAdmin },
       process.env.JWT_SECRET
     );
-    // Send the response (token, user data)
+
+    // 7. Send the response (token, user data)
     res.status(201).json({
       success: true,
       message: "User logged in successfully",
@@ -188,6 +207,7 @@ const loginUser = async (req, res) => {
     });
   }
 };
+
 // Forgot password by using phonenumber
 
 const forgotPassword = async (req, res) => {
