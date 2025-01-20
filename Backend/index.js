@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 const acceptFormData = require("express-fileupload");
 const cors = require("cors");
 
-const http = require("http");
+// const http = require("http");
 
 // Creating an express app
 const app = express();
@@ -53,11 +53,11 @@ app.use("/api/user", require("./routes/userRoutes"));
 // http://localhost:5000/test
 
 // Create HTTP server and initialize Socket.io
-const server = http.createServer(app);
+// const server = http.createServer(app);
 
 // Starting the server (always at the last)
-server.listen(PORT, () => {
-  console.log(`Server started at port ${PORT}`);
-});
+// server.listen(PORT, () => {
+//   console.log(`Server started at port ${PORT}`);
+// });
 
 module.exports = app;

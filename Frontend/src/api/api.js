@@ -1,63 +1,63 @@
-import axios from 'axios';
+import axios from "axios";
 
 // Creating backend config
 const Api = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: "http://localhost:5000",
   withCredentials: true,
   headers: {
-    'Content-Type': 'multipart/form-data',
+    "Content-Type": "multipart/form-data",
   },
 });
 
 const config = {
   headers: {
-    authorization: `Bearer ${localStorage.getItem('token')}`,
+    authorization: `Bearer ${localStorage.getItem("token")}`,
   },
 };
 const jsonConfig = {
   headers: {
-    'Content-Type': 'application/json',
-    authorization: `Bearer ${localStorage.getItem('token')}`,
+    "Content-Type": "application/json",
+    authorization: `Bearer ${localStorage.getItem("token")}`,
   },
 };
 
-export const url = 'http://localhost:5000';
+export const url = "http://localhost:5000";
 
 // Test API
-export const testApi = () => Api.get('/test');
+export const testApi = () => Api.get("/test");
 
 // Create API
-export const registerUserApi = (data) => Api.post('/api/user/create', data);
+export const registerUserApi = (data) => Api.post("/api/user/create", data);
 
 // Login API
-export const loginUserApi = (data) => Api.post('/api/user/login', data);
+export const loginUserApi = (data) => Api.post("/api/user/login", data);
 
 // Forgot Password API
 export const forgotPasswordApi = (data) =>
-  Api.post('/api/user/forgot_password', data);
+  Api.post("/api/user/forgot_password", data);
 
 // Reset Password API
 export const resetPasswordApi = (data) =>
-  Api.post('/api/user/reset_password', data);
+  Api.post("/api/user/reset_password", data);
 
 // Update Profile API
 export const updateProfileApi = (data) =>
-  Api.put('/api/user/update_profile', data, config);
+  Api.put("/api/user/update_profile", data, config);
 
 // Get current user API
 export const getCurrentUserApi = (id) =>
   Api.get(`/api/user/current_profile`, config);
 
 // Get all users API
-export const getAllUsersApi = () => Api.get('/api/user/get_all_user', config);
+export const getAllUsersApi = () => Api.get("/api/user/get_all_user", config);
 
 // =============================== BIKE API ===========================================
 // create bike API
 export const createBikeApi = (data) =>
-  Api.post('/api/bike/create/bike', data, config);
+  Api.post("/api/bike/create/bike", data, config);
 
 // get all bike API
-export const getAllBikeApi = () => Api.get('/api/bike/get_all_bikes', config);
+export const getAllBikeApi = () => Api.get("/api/bike/get_all_bikes", config);
 
 // get bike model
 export const getBikeByModel = (bikeName) =>
@@ -88,10 +88,10 @@ export const bikeCount = () => {
 
 // Add to Boking API
 export const addToBookingApi = (data) =>
-  Api.post('/api/booking/add', data, config);
+  Api.post("/api/booking/add", data, config);
 
 // Display Booking
-export const getAllBookingApi = () => Api.get('/api/booking/all', config);
+export const getAllBookingApi = () => Api.get("/api/booking/all", config);
 
 // Delete Booking
 export const deleteBookingApi = (id) => Api.delete(`/api/booking/delete/${id}`);
@@ -107,31 +107,7 @@ export const cancelBookingApi = (id) => {
 // ============================= Admin Panel ===========================================
 
 export const getDashboardStats = () =>
-  Api.get('/api/admin/dashboard_stats', config);
-
-// ================================= Message API ===========================================
-export const sendMessageApi = (message) =>
-  Api.post('/api/messages/send', message, config);
-export const getMessagesApi = (id, page) =>
-  Api.get(`/api/messages/get/${id}?page=${page}`, config);
-
-export const getByIdApi = (id) =>
-  Api.get(`/api/messages/get_by_id/${id}`, config);
-
-export const updateMessageApi = (id, message) =>
-  Api.put(`/api/messages/update/${id}`, message, config);
-
-export const deleteMessageApi = (id) =>
-  Api.delete(`/api/messages/delete/${id}`, config);
-
-export const getChatListApi = () => Api.get(`/api/messages/get`, config);
-
-export const sendFileApi = (data, config) =>
-  Api.post(`/api/messages/send/file`, data, config);
-
-// ================================== Message File ==========================
-export const messageFileUrl = 'http://localhost:5000/messages/files';
-export const messageImageUrl = 'http://localhost:5000/messages/images';
+  Api.get("/api/admin/dashboard_stats", config);
 
 // =============================== Notification =========================
 export const getNotificationApi = () =>
@@ -147,11 +123,11 @@ export const sendNotificationApi = (data) =>
 // ================================ Feedback API ==============================
 
 export const sendFeedbackApi = (data) =>
-  Api.post('/api/feedback/postFeedback', data, config);
+  Api.post("/api/feedback/postFeedback", data, config);
 
 export const getFeedbackApi = () =>
-  Api.get('/api/feedback/getFeedback', config);
+  Api.get("/api/feedback/getFeedback", config);
 
 // =================== Payment ======================
 export const initializeKhaltiPaymentApi = (data) =>
-  Api.post('/api/payment/initialize_khalti', data, jsonConfig);
+  Api.post("/api/payment/initialize_khalti", data, jsonConfig);
