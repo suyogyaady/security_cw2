@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   fullName: {
@@ -32,5 +32,14 @@ const userSchema = new mongoose.Schema({
     default: null,
   },
 });
-const User = mongoose.model('users', userSchema);
+
+// Pre-save hook to ensure only the last 5 passwords are stored
+userSchema.pre("save", function (next) {
+  if (this.passwordHistory.length > 5) {
+    this.passwordHistory = this.passwordHistory.slice(-5); // Keep only the last 5 entries
+  }
+  next();
+});
+
+const User = mongoose.model("users", userSchema);
 module.exports = User;
