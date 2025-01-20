@@ -13,6 +13,7 @@
     "emoji-picker-react": "^4.11.1",
     "font-awesome": "^4.7.0",
     "framer-motion": "^11.3.21",
+    "https": "^1.0.0",
     "khalti-checkout-web": "^2.2.0",
     "mockito": "^1.0.7",
     "moment": "^2.30.1",
