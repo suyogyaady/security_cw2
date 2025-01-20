@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import ReCAPTCHA from "react-google-recaptcha"; // Import reCAPTCHA component
 import { registerUserApi } from "../../api/api";
 
 const Register = () => {
@@ -12,6 +13,7 @@ const Register = () => {
     confirmPassword: "",
   });
 
+  const [captchaToken, setCaptchaToken] = useState(null); // State to store CAPTCHA token
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
@@ -38,6 +40,10 @@ const Register = () => {
       newErrors.confirmPassword = "Confirm Password is required";
     else if (confirmPassword !== password)
       newErrors.confirmPassword = "Passwords don't match";
+    if (!captchaToken) {
+      toast.error("Please complete the CAPTCHA");
+      newErrors.captcha = "CAPTCHA is required";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -47,7 +53,10 @@ const Register = () => {
     e.preventDefault();
     if (validate()) {
       try {
-        const response = await registerUserApi(formData);
+        const response = await registerUserApi({
+          ...formData,
+          recaptchaToken: captchaToken,
+        });
         if (response.data.success) {
           toast.success(response.data.message);
           // Redirect to login or dashboard
@@ -55,9 +64,13 @@ const Register = () => {
           toast.error(response.data.message);
         }
       } catch (error) {
-        toast.error("An error occurred. Please try again.");
+        toast.error(error || "Failed to create account");
       }
     }
+  };
+
+  const handleCaptchaChange = (token) => {
+    setCaptchaToken(token); // Store CAPTCHA token
   };
 
   return (
@@ -126,6 +139,19 @@ const Register = () => {
                 )}
               </div>
             ))}
+          </div>
+
+          {/* reCAPTCHA Widget */}
+          <div className="mt-4">
+            <ReCAPTCHA
+              sitekey="6Lf6I70qAAAAAIBWOMi8J81PmIf2KTZFgKAJ9Iw-" // Replace with your Site Key
+              onChange={handleCaptchaChange}
+            />
+            {errors.captcha && (
+              <p className="text-red-500 text-xs italic mt-1">
+                {errors.captcha}
+              </p>
+            )}
           </div>
 
           <div>

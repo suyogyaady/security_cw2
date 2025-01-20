@@ -31,6 +31,14 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  passwordHistory: {
+    type: [String], // Array of previous hashed passwords
+    default: [],
+  },
+  passwordLastUpdated: {
+    type: Date,
+    default: Date.now, // Set to current date by default
+  },
 });
 
 // Pre-save hook to ensure only the last 5 passwords are stored
