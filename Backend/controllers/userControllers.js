@@ -1,13 +1,13 @@
-const userModel = require('../models/userModel');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const sentOtp = require('../service/sendOtp');
-const sendEmail = require('../service/otpEmailService');
-const { OAuth2Client } = require('google-auth-library');
+const userModel = require("../models/userModel");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const sentOtp = require("../service/sendOtp");
+const sendEmail = require("../service/otpEmailService");
+const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const path = require('path');
-const axios = require('axios');
-const fs = require('fs');
+const path = require("path");
+const axios = require("axios");
+const fs = require("fs");
 
 const validator = require("validator"); // For validation and sanitation
 
@@ -105,7 +105,6 @@ const createUser = async (req, res) => {
   }
 };
 
-
 //   // 1. Check incoming data
 //   console.log(req.body);
 
@@ -172,7 +171,7 @@ const loginUser = async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({
       success: false,
-      message: 'Please enter all fields!',
+      message: "Please enter all fields!",
     });
   }
   try {
@@ -184,7 +183,7 @@ const loginUser = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
     // 4.2 if user found
@@ -194,13 +193,12 @@ const loginUser = async (req, res) => {
     if (!passwordCorrect) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid Password',
+        message: "Invalid Password",
       });
     }
 
     // 5.2 if password is correct
 
-    
     // Token (generate -user data and key)
     const token = await jwt.sign(
       { id: user._id, isAdmin: user.isAdmin },
@@ -209,7 +207,7 @@ const loginUser = async (req, res) => {
     // Send the response (token, user data)
     res.status(201).json({
       success: true,
-      message: 'User logged in successfully',
+      message: "User logged in successfully",
       token: token,
       user: {
         id: user._id,
@@ -223,7 +221,7 @@ const loginUser = async (req, res) => {
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: "Internal server error",
     });
   }
 };
@@ -237,7 +235,7 @@ const forgotPassword = async (req, res) => {
   if (!phone) {
     return res.status(400).json({
       success: false,
-      message: 'Please enter your phone number',
+      message: "Please enter your phone number",
     });
   }
   try {
@@ -245,7 +243,7 @@ const forgotPassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
     // Generate OTP
@@ -262,19 +260,19 @@ const forgotPassword = async (req, res) => {
     if (!isSent) {
       return res.status(400).json({
         success: false,
-        message: 'Error in sending OTP',
+        message: "Error in sending OTP",
       });
     }
 
     res.status(200).json({
       success: true,
-      message: 'OTP sent to your phone number',
+      message: "OTP sent to your phone number",
     });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: "Internal server error",
     });
   }
 };
@@ -287,7 +285,7 @@ const resetPassword = async (req, res) => {
   if (!phone || !otp || !newPassword) {
     return res.status(400).json({
       success: false,
-      message: 'Please enter all fields',
+      message: "Please enter all fields",
     });
   }
 
@@ -296,21 +294,21 @@ const resetPassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
 
     if (user.resetPasswordOTP !== otp) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid OTP',
+        message: "Invalid OTP",
       });
     }
 
     if (user.resetPasswordOTPExpiry < Date.now()) {
       return res.status(400).json({
         success: false,
-        message: 'OTP expired',
+        message: "OTP expired",
       });
     }
 
@@ -324,13 +322,13 @@ const resetPassword = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Password reset successful',
+      message: "Password reset successful",
     });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: "Internal server error",
     });
   }
 };
@@ -342,7 +340,7 @@ const forgotPasswordByEmail = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
     // sent email service
@@ -358,18 +356,18 @@ const forgotPasswordByEmail = async (req, res) => {
     if (!emailSent) {
       return res.status(500).json({
         success: false,
-        message: 'Email not sent',
+        message: "Email not sent",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: 'Email sent to reset password',
+      message: "Email sent to reset password",
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
       error: error,
     });
   }
@@ -385,7 +383,7 @@ const resetPasswordByEmail = async (req, res) => {
     if (!token || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please fill all the fields',
+        message: "Please fill all the fields",
       });
     }
 
@@ -394,7 +392,7 @@ const resetPasswordByEmail = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
     // check if jwt token is valid
@@ -402,7 +400,7 @@ const resetPasswordByEmail = async (req, res) => {
       if (err) {
         return res.status(400).json({
           success: false,
-          message: 'Invalid or expired token',
+          message: "Invalid or expired token",
         });
       }
 
@@ -416,13 +414,13 @@ const resetPasswordByEmail = async (req, res) => {
 
       return res.status(200).json({
         success: true,
-        message: 'Password reset successfully!',
+        message: "Password reset successfully!",
       });
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
       error: error,
     });
   }
@@ -436,19 +434,19 @@ const getCurrentProfile = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
     res.status(200).json({
       success: true,
-      message: 'User fetched successfully',
+      message: "User fetched successfully",
       user: user,
     });
   } catch (error) {
     console.log(error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: "Internal server error",
       error: error,
     });
   }
@@ -464,7 +462,7 @@ const getToken = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
 
@@ -474,20 +472,20 @@ const getToken = async (req, res) => {
       (options = {
         expiresIn:
           Date.now() + process.env.JWT_TOKEN_EXPIRE * 24 * 60 * 60 * 1000 ||
-          '1d',
+          "1d",
       })
     );
 
     return res.status(200).json({
       success: true,
-      message: 'Token generated successfully!',
+      message: "Token generated successfully!",
       token: jwtToken,
     });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
       error: error,
     });
   }
@@ -499,7 +497,7 @@ const updateUserProfile = async (req, res) => {
   if (!fullName || !email || !phoneNumber) {
     return res.status(400).json({
       success: false,
-      message: 'Please enter all required fields',
+      message: "Please enter all required fields",
     });
   }
 
@@ -509,7 +507,7 @@ const updateUserProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
 
@@ -522,7 +520,7 @@ const updateUserProfile = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'User profile updated successfully',
+      message: "User profile updated successfully",
       user: {
         fullName: user.fullName,
         email: user.email,
@@ -533,7 +531,7 @@ const updateUserProfile = async (req, res) => {
     console.log(error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: "Internal server error",
     });
   }
 };
@@ -545,14 +543,14 @@ const getAllUser = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'All User Fetched',
+      message: "All User Fetched",
       users: users,
     });
   } catch (error) {
     console.log(error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: "Internal server error",
       error: error,
     });
   }
@@ -568,7 +566,7 @@ const googleLogin = async (req, res) => {
   if (!token) {
     return res.status(400).json({
       success: false,
-      message: 'Please fill all the fields',
+      message: "Please fill all the fields",
     });
   }
 
@@ -591,7 +589,7 @@ const googleLogin = async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, randomSalt);
 
       // Fetch the image from Google
-      const response = await axios.get(picture, { responseType: 'stream' });
+      const response = await axios.get(picture, { responseType: "stream" });
 
       // Set up image name and path
       const imageName = `${given_name}_${family_name}_${Date.now()}.png`;
@@ -607,8 +605,8 @@ const googleLogin = async (req, res) => {
 
       // Wait for the image to be fully saved
       await new Promise((resolve, reject) => {
-        writer.on('finish', resolve);
-        writer.on('error', reject);
+        writer.on("finish", resolve);
+        writer.on("error", reject);
       });
 
       user = new userModel({
@@ -630,13 +628,13 @@ const googleLogin = async (req, res) => {
       (options = {
         expiresIn:
           Date.now() + process.env.JWT_TOKEN_EXPIRE * 24 * 60 * 60 * 1000 ||
-          '1d',
+          "1d",
       })
     );
 
     return res.status(201).json({
       success: true,
-      message: 'User Logged In Successfully!',
+      message: "User Logged In Successfully!",
       token: jwtToken,
       user: {
         id: user._id,
@@ -651,7 +649,7 @@ const googleLogin = async (req, res) => {
     console.log(error);
     res.status(500).json({
       success: false,
-      message: 'Internal Server Error!',
+      message: "Internal Server Error!",
       error: error,
     });
   }
@@ -667,7 +665,7 @@ const getUserByGoogleEmail = async (req, res) => {
   if (!token) {
     return res.status(400).json({
       success: false,
-      message: 'Please fill all the fields',
+      message: "Please fill all the fields",
     });
   }
   try {
@@ -686,20 +684,20 @@ const getUserByGoogleEmail = async (req, res) => {
     if (user) {
       return res.status(200).json({
         success: true,
-        message: 'User found',
+        message: "User found",
         data: user,
       });
     }
 
     res.status(201).json({
       success: true,
-      message: 'User not found',
+      message: "User not found",
     });
   } catch (e) {
     console.log(e);
     res.status(500).json({
       success: false,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
       error: e,
     });
   }

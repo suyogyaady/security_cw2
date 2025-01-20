@@ -11,6 +11,7 @@
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
     "emoji-picker-react": "^4.11.1",
+    "final_assignment": "file:",
     "font-awesome": "^4.7.0",
     "framer-motion": "^11.3.21",
     "https": "^1.0.0",
@@ -31,7 +32,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set HTTPS=true&&set SSL_CRT_FILE=./root.crt&&set SSL_KEY_FILE=./root.key&&react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --transformIgnorePatterns \"node_modules/(?!axios)/\"",
     "eject": "react-scripts eject"

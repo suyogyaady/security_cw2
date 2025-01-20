@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 
 dotenv.config();
 
@@ -7,7 +7,7 @@ dotenv.config();
 const connectDatabase = () => {
   //Connecting to Cloud Database
   mongoose.connect(process.env.MONGODB_CLOUD).then(() => {
-    console.log('Database Connected');
+    console.log("Database Connected");
   });
 };
 
