@@ -8,6 +8,8 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const path = require("path");
 const axios = require("axios");
 const fs = require("fs");
+const crypto = require("crypto"); // To generate OTP
+const nodemailer = require("nodemailer"); // For sending emails
 
 const validator = require("validator"); // For validation and sanitation
 
@@ -124,13 +126,10 @@ const createUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  // 1. Check incoming data
   console.log(req.body);
 
-  // 2. Destructure the incoming data
   const { email, password, recaptchaToken } = req.body;
 
-  // 3. Validate the data (if empty, stop the process and send response)
   if (!email || !password || !recaptchaToken) {
     return res.status(400).json({
       success: false,
@@ -139,11 +138,9 @@ const loginUser = async (req, res) => {
   }
 
   try {
-    // 4. Validate reCAPTCHA token
-    const secretKey = process.env.RECAPTCHA_SECRET_KEY; // Use secret key from .env
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
     const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
 
-    // Verify token with Google's API
     const recaptchaResponse = await axios.post(verifyUrl, null, {
       params: {
         secret: secretKey,
@@ -158,10 +155,8 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // 5. Check if the user is already registered
     const user = await userModel.findOne({ email: email });
 
-    // 5.1 If user not found: Send response
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -169,10 +164,8 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // 5.2 If user found, check if the password is correct
     const passwordCorrect = await bcrypt.compare(password, user.password);
 
-    // 5.3 If password is wrong: Send response
     if (!passwordCorrect) {
       return res.status(400).json({
         success: false,
@@ -180,16 +173,88 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // 6. Generate token (user data and secret key)
+    // Generate OTP
+    const otp = crypto.randomInt(100000, 999999).toString(); // 6-digit OTP
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
+
+    // Update user with OTP and expiry
+    user.googleOTP = otp;
+    user.googleOTPExpiry = otpExpiry;
+    await user.save();
+
+    // Send OTP via email
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Your OTP for Login",
+      text: `Your OTP is ${otp}. It is valid for 10 minutes.`,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent to your email.",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+// Forgot password by using phonenumber
+
+const verifyOTP = async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide email and OTP.",
+    });
+  }
+
+  try {
+    const user = await userModel.findOne({ email: email });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    // Check if OTP matches and is not expired
+    if (user.googleOTP !== otp || new Date() > user.googleOTPExpiry) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP.",
+      });
+    }
+
+    // Clear OTP after successful verification
+    user.googleOTP = null;
+    user.googleOTPExpiry = null;
+    await user.save();
+
+    // Generate token
     const token = await jwt.sign(
       { id: user._id, isAdmin: user.isAdmin },
       process.env.JWT_SECRET
     );
 
-    // 7. Send the response (token, user data)
-    res.status(201).json({
+    return res.status(200).json({
       success: true,
-      message: "User logged in successfully",
+      message: "OTP verified successfully.",
       token: token,
       user: {
         id: user._id,
@@ -207,8 +272,6 @@ const loginUser = async (req, res) => {
     });
   }
 };
-
-// Forgot password by using phonenumber
 
 const forgotPassword = async (req, res) => {
   console.log(req.body);
@@ -689,6 +752,7 @@ const getUserByGoogleEmail = async (req, res) => {
 module.exports = {
   createUser,
   loginUser,
+  verifyOTP,
   forgotPassword,
   resetPassword,
   getCurrentProfile,

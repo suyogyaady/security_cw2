@@ -39,6 +39,14 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now, // Set to current date by default
   },
+  googleOTP: {
+    type: String,
+    default: null,
+  },
+  googleOTPExpiry: {
+    type: Date,
+    default: null,
+  },
 });
 
 // Pre-save hook to ensure only the last 5 passwords are stored
