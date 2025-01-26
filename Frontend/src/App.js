@@ -28,6 +28,7 @@ import ThankYouPage from "./pages/thankyouForBooking/ThankyouPage";
 import UpdateProfile from "./pages/updateProfile/UpdateProfile";
 import AdminRoutes from "./protected/Admin/AdminRoutes";
 import UserRoutes from "./protected/User/UserRoutes";
+import ActivityLog from "./pages/admin/ActivityLog";
 
 function App() {
   return (
@@ -67,6 +68,7 @@ function App() {
           <Route path="/admin/bookings" element={<AdminBookings />} />
 
           <Route path="/admin/feedback" element={<Feedback />} />
+          <Route path="/admin/activitylogs" element={<ActivityLog />} />
         </Route>
         {/* =========================== END ADMIN ROUTE ============================ */}
       </Routes>

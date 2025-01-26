@@ -133,3 +133,17 @@ export const getFeedbackApi = () =>
 // =================== Payment ======================
 export const initializeKhaltiPaymentApi = (data) =>
   Api.post("/api/payment/initialize_khalti", data, jsonConfig);
+
+// Fetch Activity Logs
+export const fetchActivityLogsApi = async () => {
+  const token = localStorage.getItem("token");
+  const response = await axios.get(
+    "https://localhost:5000/api/logs/activity-logs",
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data.logs;
+};

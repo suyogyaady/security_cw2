@@ -10,6 +10,7 @@ const helmet = require("helmet");
 const https = require("https");
 const mongoSanitize = require("express-mongo-sanitize");
 const xssClean = require("xss-clean");
+const { logRequest } = require("./middleware/activityLogs");
 
 // const http = require("http");
 
@@ -23,6 +24,9 @@ const corsOptions = {
   optionSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
+
+//log request
+app.use(logRequest);
 
 //helmet
 app.use(helmet());
