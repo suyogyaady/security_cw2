@@ -30,7 +30,8 @@
     "react-toastify": "^10.0.5",
     "socket.io-client": "^4.7.5",
     "timeago.js": "^4.0.2",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "zxcvbn": "^4.4.2"
   },
   "scripts": {
     "start": "set HTTPS=true&&set SSL_CRT_FILE=./server.crt&&set SSL_KEY_FILE=./server.key&&react-scripts start",
