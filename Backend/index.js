@@ -6,6 +6,7 @@ const acceptFormData = require("express-fileupload");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
+const helmet = require("helmet");
 const https = require("https");
 const mongoSanitize = require("express-mongo-sanitize");
 const xssClean = require("xss-clean");
@@ -22,6 +23,9 @@ const corsOptions = {
   optionSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
+
+//helmet
+app.use(helmet());
 
 // Express Json Config
 app.use(express.json());
