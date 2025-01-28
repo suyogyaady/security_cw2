@@ -128,11 +128,11 @@ const ActivityLog = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-400 to-red-400 flex items-center justify-center text-white">
-                      {log.username[0].toUpperCase()}
+                      {log.fullName[0].toUpperCase()}
                     </div>
                     <div className="ml-3">
                       <div className="text-sm font-medium text-gray-900">
-                        {log.username}
+                        {log.fullName}
                       </div>
                     </div>
                   </div>

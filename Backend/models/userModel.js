@@ -32,12 +32,12 @@ const userSchema = new mongoose.Schema({
     default: null,
   },
   passwordHistory: {
-    type: [String], // Array of previous hashed passwords
+    type: [String],
     default: [],
   },
   passwordLastUpdated: {
     type: Date,
-    default: Date.now, // Set to current date by default
+    default: Date.now,
   },
   googleOTP: {
     type: String,

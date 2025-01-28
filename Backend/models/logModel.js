@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const logSchema = new mongoose.Schema(
   {
-    username: String,
+    fullName: String,
     url: String,
     method: String,
     role: String,
