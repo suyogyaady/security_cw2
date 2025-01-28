@@ -12,7 +12,7 @@ import {
   FiServer,
 } from "react-icons/fi";
 import { motion } from "framer-motion";
-
+  
 const ActivityLog = () => {
   const [logs, setLogs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,7 +21,7 @@ const ActivityLog = () => {
     const fetchLogs = async () => {
       try {
         const fetchedLogs = await fetchActivityLogsApi();
-        setLogs(fetchedLogs);
+        setLogs(fetchedLogs || []);
         setIsLoading(false);
       } catch (error) {
         toast.error("Failed to fetch activity logs");
@@ -119,7 +119,7 @@ const ActivityLog = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {logs.map((log, index) => (
               <motion.tr
-                key={log._id}
+                key={log._id || index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -128,18 +128,18 @@ const ActivityLog = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-400 to-red-400 flex items-center justify-center text-white">
-                      {log.fullName[0].toUpperCase()}
+                      {(log.fullName && log.fullName[0]?.toUpperCase()) || "?"}
                     </div>
                     <div className="ml-3">
                       <div className="text-sm font-medium text-gray-900">
-                        {log.fullName}
+                        {log.fullName || "Unknown"}
                       </div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-gray-900 max-w-xs truncate">
-                    {log.url}
+                    {log.url || "N/A"}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -148,12 +148,12 @@ const ActivityLog = () => {
                       log.method
                     )}`}
                   >
-                    {log.method}
+                    {log.method || "N/A"}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                    {log.role}
+                    {log.role || "Unknown"}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -167,17 +167,17 @@ const ActivityLog = () => {
                     ) : (
                       <FiAlertCircle className="mr-1" />
                     )}
-                    {log.status}
+                    {log.status || "N/A"}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(log.time).toLocaleString()}
+                  {log.time ? new Date(log.time).toLocaleString() : "N/A"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {log.device}
+                  {log.device || "Unknown"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {log.ipAddress}
+                  {log.ipAddress || "N/A"}
                 </td>
               </motion.tr>
             ))}

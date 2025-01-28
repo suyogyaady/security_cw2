@@ -1,4 +1,6 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
+const User = require("../models/userModel");
+
 const authGuard = (req, res, next) => {
   // check incoming data
   console.log(req.headers); //pass
@@ -10,18 +12,18 @@ const authGuard = (req, res, next) => {
   if (!authHeader) {
     return res.status(400).json({
       success: false,
-      message: 'Auth header is missing',
+      message: "Auth header is missing",
     });
   }
 
   // Split the data (Format : 'Bearer token-joyboy') -> only token
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.split(" ")[1];
 
   // if token is not found : stop the process (res)
-  if (!token || token === '') {
+  if (!token || token === "") {
     return res.status(400).json({
       success: false,
-      message: 'Please provide a token',
+      message: "Please provide a token",
     });
   }
 
@@ -34,7 +36,7 @@ const authGuard = (req, res, next) => {
     console.log(error);
     return res.status(400).json({
       success: false,
-      message: 'Not Authenticated',
+      message: "Not Authenticated",
     });
   }
 
@@ -54,18 +56,18 @@ const adminGuard = (req, res, next) => {
   if (!authHeader) {
     return res.status(400).json({
       success: false,
-      message: 'Auth header is missing',
+      message: "Auth header is missing",
     });
   }
 
   // Split the data (Format : 'Bearer token-joyboy') -> only token
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.split(" ")[1];
 
   // if token is not found : stop the process (res)
-  if (!token || token === '') {
+  if (!token || token === "") {
     return res.status(400).json({
       success: false,
-      message: 'Please provide a token',
+      message: "Please provide a token",
     });
   }
 
@@ -76,7 +78,7 @@ const adminGuard = (req, res, next) => {
     if (!req.user.isAdmin) {
       return res.status(400).json({
         success: false,
-        message: 'You are not authorized to perform this action',
+        message: "You are not authorized to perform this action",
       });
     }
     next();
@@ -84,7 +86,7 @@ const adminGuard = (req, res, next) => {
     console.log(error);
     return res.status(400).json({
       success: false,
-      message: 'Not Authenticated',
+      message: "Not Authenticated",
     });
   }
 
@@ -92,7 +94,10 @@ const adminGuard = (req, res, next) => {
   // if not verified : not auth
 };
 
+
+
 module.exports = {
   authGuard,
   adminGuard,
+  
 };
