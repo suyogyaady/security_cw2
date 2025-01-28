@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import DOMPurify from "dompurify"; // Import DOMPurify
 import {
   FaEnvelope,
   FaLock,
@@ -21,7 +22,7 @@ const Login = () => {
   // State for login form
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // Toggle for password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState(null);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -63,7 +64,16 @@ const Login = () => {
     e.preventDefault();
     if (!validate()) return;
 
-    const data = { email, password, recaptchaToken: captchaToken };
+    // Sanitize inputs
+    const sanitizedEmail = DOMPurify.sanitize(email);
+    const sanitizedPassword = DOMPurify.sanitize(password);
+
+    const data = {
+      email: sanitizedEmail,
+      password: sanitizedPassword,
+      recaptchaToken: captchaToken,
+    };
+
     try {
       const res = await loginUserApi(data);
       if (res.data.success) {
@@ -82,8 +92,14 @@ const Login = () => {
     e.preventDefault();
     setIsVerifyingOtp(true);
 
+    // Sanitize inputs
+    const sanitizedOtp = DOMPurify.sanitize(otp);
+
     try {
-      const res = await verifyotpApi({ email, otp });
+      const res = await verifyotpApi({
+        email: DOMPurify.sanitize(email),
+        otp: sanitizedOtp,
+      });
       if (res.data.success) {
         toast.success("OTP verified successfully");
         localStorage.setItem("token", res.data.token);
@@ -105,7 +121,18 @@ const Login = () => {
       toast.error("Passwords do not match");
       return;
     }
-    const data = { phone, otp, newPassword: resetPassword };
+
+    // Sanitize inputs
+    const sanitizedPhone = DOMPurify.sanitize(phone);
+    const sanitizedResetPassword = DOMPurify.sanitize(resetPassword);
+    const sanitizedOtp = DOMPurify.sanitize(otp);
+
+    const data = {
+      phone: sanitizedPhone,
+      otp: sanitizedOtp,
+      newPassword: sanitizedResetPassword,
+    };
+
     resetPasswordApi(data)
       .then((res) => {
         toast.success(res.data.message);
@@ -119,7 +146,11 @@ const Login = () => {
 
   const sendOtp = (e) => {
     e.preventDefault();
-    forgotPasswordApi({ phone })
+
+    // Sanitize inputs
+    const sanitizedPhone = DOMPurify.sanitize(phone);
+
+    forgotPasswordApi({ phone: sanitizedPhone })
       .then((res) => {
         toast.success(res.data.message);
         setIsSentOtp(true);
@@ -258,15 +289,23 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-2xl">
+        {/* Header Section */}
         <div>
           <FaMotorcycle className="mx-auto h-12 w-auto text-indigo-600" />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Welcome to Home Bike Service
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Your one-stop solution for bike home servicing
-          </p>
+          <p
+            className="mt-2 text-center text-sm text-gray-600"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(
+                "Your <strong>one-stop solution</strong> for bike home servicing"
+              ),
+            }}
+          />
         </div>
+
+        {/* Login Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
@@ -314,13 +353,25 @@ const Login = () => {
             </div>
           </div>
 
+          {/* Error Messages */}
           {emailError && (
-            <p className="text-red-500 text-xs italic">{emailError}</p>
+            <p
+              className="text-red-500 text-xs italic"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(emailError),
+              }}
+            />
           )}
           {passwordError && (
-            <p className="text-red-500 text-xs italic">{passwordError}</p>
+            <p
+              className="text-red-500 text-xs italic"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(passwordError),
+              }}
+            />
           )}
 
+          {/* Forgot Password Link */}
           <div className="flex items-center justify-between">
             <div className="text-sm">
               <button
@@ -333,6 +384,7 @@ const Login = () => {
             </div>
           </div>
 
+          {/* ReCAPTCHA */}
           <div className="mt-4">
             <ReCAPTCHA
               sitekey="6Lf6I70qAAAAAIBWOMi8J81PmIf2KTZFgKAJ9Iw-"
@@ -340,6 +392,7 @@ const Login = () => {
             />
           </div>
 
+          {/* Sign In Button */}
           <div>
             <button
               type="submit"
@@ -350,6 +403,7 @@ const Login = () => {
           </div>
         </form>
 
+        {/* Sign-Up Link */}
         <div className="text-center">
           <Link
             to="/register"
@@ -359,6 +413,8 @@ const Login = () => {
           </Link>
         </div>
       </div>
+
+      {/* Conditional Modals */}
       {showOtpModal && <OtpModal />}
       {showResetModal && <ResetPasswordModal />}
     </div>

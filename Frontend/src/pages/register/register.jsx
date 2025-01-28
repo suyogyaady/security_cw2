@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import DOMPurify from "dompurify"; // Import DOMPurify
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import ReCAPTCHA from "react-google-recaptcha"; // Import reCAPTCHA component
@@ -23,14 +24,16 @@ const Register = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const sanitizedValue = DOMPurify.sanitize(value); // Sanitize input
+
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: sanitizedValue,
     }));
 
     // Calculate password strength
     if (name === "password") {
-      const strength = zxcvbn(value);
+      const strength = zxcvbn(sanitizedValue);
       setPasswordStrength(strength); // Store the full strength object
     }
   };
@@ -64,10 +67,15 @@ const Register = () => {
     e.preventDefault();
     if (validate()) {
       try {
-        const response = await registerUserApi({
-          ...formData,
+        const sanitizedFormData = {
+          fullName: DOMPurify.sanitize(formData.fullName),
+          email: DOMPurify.sanitize(formData.email),
+          phoneNumber: DOMPurify.sanitize(formData.phoneNumber),
+          password: DOMPurify.sanitize(formData.password),
           recaptchaToken: captchaToken,
-        });
+        };
+
+        const response = await registerUserApi(sanitizedFormData);
         if (response.data.success) {
           toast.success(response.data.message);
           // Redirect to login or dashboard
@@ -75,7 +83,9 @@ const Register = () => {
           toast.error(response.data.message);
         }
       } catch (error) {
-        toast.error(error || "Failed to create account");
+        toast.error(
+          error?.response?.data?.message || "Failed to create account"
+        );
       }
     }
   };
@@ -122,9 +132,12 @@ const Register = () => {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Create your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Join us and start your journey
-          </p>
+          <p
+            className="mt-2 text-center text-sm text-gray-600"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize("Join us and start your journey"),
+            }}
+          />
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
@@ -146,13 +159,10 @@ const Register = () => {
                   className={`appearance-none rounded-md relative block w-full px-3 py-2 border ${
                     errors[field] ? "border-red-300" : "border-gray-300"
                   } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
-                  placeholder={
-                    field.charAt(0).toUpperCase() +
-                    field
-                      .slice(1)
-                      .replace(/([A-Z])/g, " $1")
-                      .trim()
-                  }
+                  placeholder={field
+                    .charAt(0)
+                    .toUpperCase()
+                    .concat(field.slice(1))}
                   onChange={handleChange}
                   value={formData[field]}
                 />

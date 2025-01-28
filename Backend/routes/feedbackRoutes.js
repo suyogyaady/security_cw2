@@ -1,21 +1,23 @@
-const express = require('express');
+const express = require("express");
 
-const feedbackController = require('../controllers/feedbackController');
-const { authGuard } = require('../middleware/authGuard');
+const feedbackController = require("../controllers/feedbackController");
+const { authGuard } = require("../middleware/authGuard");
 const { logRequest } = require("../middleware/activityLogs");
 
 const router = express.Router();
 
 router.post(
   "/postFeedback",
-  logRequest,
+
   authGuard,
+  logRequest,
   feedbackController.submitFeedback
 );
 router.get(
   "/getFeedback",
-  logRequest,
+
   authGuard,
+  logRequest,
   feedbackController.getFeedback
 );
 

@@ -1,9 +1,9 @@
 const {
   initializeKhaltiPayment,
   verifyKhaltiPayment,
-} = require('../service/khaltiService');
-const Payment = require('../models/paymentModel');
-const BookingModel = require('../models/bookingModel');
+} = require("../service/khaltiService");
+const Payment = require("../models/paymentModel");
+const BookingModel = require("../models/bookingModel");
 
 // Route to initialize Khalti payment gateway
 const initializePayment = async (req, res) => {
@@ -25,21 +25,23 @@ const initializePayment = async (req, res) => {
 
     console.log(bookings);
     // Extract product names from populated products array
-    const productNames = bookings.map((p) => p.bikeNumber).join(', ');
+    const productNames = bookings
+      .map((bookingId) => bookingId.bikeName)
+      .join(", ");
 
     if (!productNames) {
       return res.send({
         success: false,
-        message: 'No booking names found',
+        message: "No booking names found",
       });
     }
 
     // Create a payment document without transactionId initially
     const OrderModelData = await Payment.create({
       bookings: bookings,
-      paymentGateway: 'khalti',
+      paymentGateway: "khalti",
       amount: totalPrice,
-      status: 'pending', // Set the initial status to pending
+      status: "pending", // Set the initial status to pending
     });
 
     // Initialize the Khalti payment
@@ -47,8 +49,8 @@ const initializePayment = async (req, res) => {
       amount: 10 * 100, // amount should be in paisa (Rs * 100)
       purchase_order_id: OrderModelData._id, // purchase_order_id because we need to verify it later
       purchase_order_name: productNames,
-      return_url: `http://localhost:3000/thankyou`, // Return URL where we verify the payment
-      website_url: website_url || 'http://localhost:3000',
+      return_url: `https://localhost:3000/thankyou`, // Return URL where we verify the payment
+      website_url: website_url || "https://localhost:3000",
     });
 
     // Update the payment record with the transactionId and pidx
@@ -69,10 +71,10 @@ const initializePayment = async (req, res) => {
       pidx: paymentInitate.pidx,
     });
   } catch (error) {
-    console.error('Error initializing payment:', error);
+    console.error("Error initializing payment:", error);
     res.json({
       success: false,
-      error: error.message || 'An error occurred',
+      error: error.message || "An error occurred",
     });
   }
 };
@@ -89,13 +91,13 @@ const completeKhaltiPayment = async (req, res) => {
 
     // Validate the payment info
     if (
-      paymentInfo?.status !== 'Completed' || // Ensure the status is "Completed"
+      paymentInfo?.status !== "Completed" || // Ensure the status is "Completed"
       paymentInfo.pidx !== pidx || // Verify pidx matches
       Number(paymentInfo.total_amount) !== Number(amount) // Compare the total amount
     ) {
       return res.status(400).json({
         success: false,
-        message: 'Incomplete or invalid payment information',
+        message: "Incomplete or invalid payment information",
         paymentInfo,
       });
     }
@@ -132,7 +134,7 @@ const completeKhaltiPayment = async (req, res) => {
           transactionId: paymentInfo.transaction_id,
           // dataFromVerificationReq: paymentInfo,
           // apiQueryFromUser: req.query,
-          status: 'success',
+          status: "success",
         },
       },
       { new: true }
@@ -141,16 +143,16 @@ const completeKhaltiPayment = async (req, res) => {
     // // Send success response
     res.status(200).json({
       success: true,
-      message: 'Payment Successful',
+      message: "Payment Successful",
       paymentData,
       transactionId: paymentInfo.transaction_id,
     });
   } catch (error) {
-    console.error('Error verifying payment:', error);
+    console.error("Error verifying payment:", error);
     res.status(500).json({
       success: false,
-      message: 'An error occurred during payment verification',
-      error: error.message || 'An unknown error occurred',
+      message: "An error occurred during payment verification",
+      error: error.message || "An unknown error occurred",
     });
   }
 };

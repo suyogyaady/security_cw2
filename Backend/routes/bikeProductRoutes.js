@@ -11,20 +11,23 @@ router.post(
 router.get("/get_all_bikes", bikeProductController.getAllBikes);
 router.get(
   "/get_one_bike/:id",
-  logRequest,
+
   authGuard,
+  logRequest,
   bikeProductController.getSingleBike
 );
 router.put(
   "/update_bike/:id",
-  logRequest,
+
   adminGuard,
+  logRequest,
   bikeProductController.updateBike
 );
 router.delete(
   "/delete_bike/:id",
-  logRequest,
+
   adminGuard,
+  logRequest,
   bikeProductController.deleteBike
 );
 router.get("/pagination", bikeProductController.paginationBike);

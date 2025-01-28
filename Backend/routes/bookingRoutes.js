@@ -16,24 +16,27 @@ router.delete("/delete/:id", bookingController.deleteBookingItem);
 // Route to get user-specific booking items
 router.get(
   "/userBooking",
-  logRequest,
+
   authGuard,
+  logRequest,
   bookingController.getUsersWithBookings
 );
 
 // Route to cancle booking
 router.put(
   "/cancel/:id",
-  logRequest,
+
   authGuard,
+  logRequest,
   bookingController.cancelBooking
 );
 
 // Route to update booking
 router.put(
   "/change_status",
-  logRequest,
+
   authGuard,
+  logRequest,
   bookingController.updateBooking
 );
 
