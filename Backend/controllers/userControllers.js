@@ -65,7 +65,7 @@ const createUser = async (req, res) => {
       return res.status(400).json({
         success: false,
         message:
-          "Password must be strong (min 8 chars, including uppercase, lowercase, number, and symbol)!",
+          "Password must be strong (min 8 chars, including uppercase, lowercase, number, and a special character)!",
       });
     }
 
@@ -118,6 +118,7 @@ const loginUser = async (req, res) => {
   }
 
   try {
+    // Verify reCAPTCHA
     const secretKey = process.env.RECAPTCHA_SECRET_KEY;
     const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
 
@@ -140,18 +141,58 @@ const loginUser = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "User not found!",
+      });
+    }
+
+    // Check if the password has expired
+    const passwordAge =
+      Date.now() - new Date(user.passwordLastUpdated).getTime();
+    const ninetyDays = 90 * 24 * 60 * 60 * 1000; // 90 days in milliseconds
+
+    if (passwordAge > ninetyDays) {
+      return res.status(403).json({
+        success: false,
+        message: "Your password has expired. Please reset your password.",
+      });
+    }
+
+    // Check if account is locked
+    if (user.lockUntil && user.lockUntil > Date.now()) {
+      const remainingTime = Math.ceil((user.lockUntil - Date.now()) / 60000); // Minutes remaining
+      return res.status(403).json({
+        success: false,
+        message: `Account locked. Try again after ${remainingTime} minute(s).`,
       });
     }
 
     const passwordCorrect = await bcrypt.compare(password, user.password);
 
     if (!passwordCorrect) {
+      user.failedLoginAttempts += 1;
+
+      // Lock account if failed attempts reach 5
+      if (user.failedLoginAttempts >= 5) {
+        user.lockUntil = new Date(Date.now() + 5 * 60 * 1000); // Lock for 5 minutes
+        await user.save();
+        return res.status(403).json({
+          success: false,
+          message:
+            "Account locked due to too many failed login attempts. Try again after 5 minutes.",
+        });
+      }
+
+      await user.save();
       return res.status(400).json({
         success: false,
-        message: "Invalid Password",
+        message: "Invalid Password!",
       });
     }
+
+    // Reset failed login attempts on successful login
+    user.failedLoginAttempts = 0;
+    user.lockUntil = null;
+    await user.save();
 
     // Generate OTP
     const otp = crypto.randomInt(100000, 999999).toString(); // 6-digit OTP
@@ -357,7 +398,7 @@ const resetPassword = async (req, res) => {
     // Update password and history
     user.password = hashedPassword;
     user.passwordHistory.push(hashedPassword);
-    user.passwordLastUpdated = Date.now();
+    user.passwordLastUpdated = Date.now(); // Update timestamp
     user.resetPasswordOTP = null;
     user.resetPasswordOTPExpiry = null;
 
