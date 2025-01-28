@@ -15,13 +15,10 @@ const validator = require("validator"); // For validation and sanitation
 
 const createUser = async (req, res) => {
   try {
-    // 1. Log incoming data (sanitized for safety)
     console.log("Incoming request:", req.body);
 
-    // Extract reCAPTCHA token and user data from request
     const { fullName, phoneNumber, email, password, recaptchaToken } = req.body;
 
-    // Validate reCAPTCHA token
     if (!recaptchaToken) {
       return res.status(400).json({
         success: false,
@@ -29,15 +26,11 @@ const createUser = async (req, res) => {
       });
     }
 
-    const secretKey = process.env.RECAPTCHA_SECRET_KEY; // Use secret key from .env
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
     const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
 
-    // Verify token with Google's API
     const recaptchaResponse = await axios.post(verifyUrl, null, {
-      params: {
-        secret: secretKey,
-        response: recaptchaToken,
-      },
+      params: { secret: secretKey, response: recaptchaToken },
     });
 
     if (!recaptchaResponse.data.success) {
@@ -47,7 +40,6 @@ const createUser = async (req, res) => {
       });
     }
 
-    // Validate user inputs (check for null, type, and format)
     if (!fullName || !phoneNumber || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -69,15 +61,7 @@ const createUser = async (req, res) => {
       });
     }
 
-    if (
-      !validator.isStrongPassword(password, {
-        minLength: 8,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-        minSymbols: 1,
-      })
-    ) {
+    if (!validator.isStrongPassword(password)) {
       return res.status(400).json({
         success: false,
         message:
@@ -85,11 +69,9 @@ const createUser = async (req, res) => {
       });
     }
 
-    // Check for existing user by email
     const existingUser = await userModel.findOne({
       email: validator.escape(email),
     });
-
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -97,21 +79,19 @@ const createUser = async (req, res) => {
       });
     }
 
-    // Hash the password with a strong hashing algorithm (bcrypt)
-    const randomSalt = await bcrypt.genSalt(12); // Using 12 rounds for better security
+    const randomSalt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, randomSalt);
 
-    // Create a new user and sanitize fields before saving
     const newUser = new userModel({
       fullName: validator.escape(fullName),
       phoneNumber: validator.escape(phoneNumber),
       email: validator.normalizeEmail(email),
       password: hashedPassword,
+      passwordHistory: [hashedPassword], // Initialize password history with the first password
     });
 
     await newUser.save();
 
-    // Send success response
     res.status(201).json({
       success: true,
       message: "User registered successfully!",
@@ -358,12 +338,29 @@ const resetPassword = async (req, res) => {
       });
     }
 
+    const isPasswordUsed = await Promise.all(
+      user.passwordHistory.map(async (oldPassword) => {
+        return bcrypt.compare(newPassword, oldPassword);
+      })
+    );
+
+    if (isPasswordUsed.includes(true)) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot reuse one of your last 5 passwords.",
+      });
+    }
+
     const randomSalt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, randomSalt);
 
+    // Update password and history
     user.password = hashedPassword;
+    user.passwordHistory.push(hashedPassword);
+    user.passwordLastUpdated = Date.now();
     user.resetPasswordOTP = null;
     user.resetPasswordOTPExpiry = null;
+
     await user.save();
 
     res.status(200).json({

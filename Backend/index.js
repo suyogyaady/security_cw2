@@ -70,6 +70,7 @@ app.use("/api/feedback", require("./routes/feedbackRoutes"));
 app.use("/api/notification", require("./routes/notificationRoutes"));
 app.use("/api/payment", require("./routes/paymentRoutes"));
 app.use("/api/user", require("./routes/userRoutes"));
+app.use("/api/logs", require("./routes/logRoutes"));
 
 https.createServer(options, app).listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

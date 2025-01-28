@@ -58,7 +58,7 @@ const ActivityLog = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 tw-ml-0 lg:tw-ml-64 min-h-screen bg-gray-900 text-white tw-relative">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-red-600 bg-clip-text text-transparent">
           System Activity Logs
