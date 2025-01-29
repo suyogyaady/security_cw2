@@ -10,20 +10,31 @@ const helmet = require("helmet");
 const https = require("https");
 const mongoSanitize = require("express-mongo-sanitize");
 const xssClean = require("xss-clean");
-const { logRequest } = require("./middleware/activityLogs");
 
 // const http = require("http");
 
 // Creating an express app
 const app = express();
 
-//  cors configuration
+// Configure CORS policy
 const corsOptions = {
-  origin: true,
-  credentials: true,
-  optionSuccessStatus: 200,
+  origin: (origin, callback) => {
+    const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
+
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true); // Allow the request
+    } else {
+      callback(new Error("Not allowed by CORS")); // Block the request
+    }
+  },
+  credentials: true, // Allow cookies and authorization headers
+  methods: ["GET", "POST", "PUT", "DELETE"], // Restrict allowed methods
+  optionsSuccessStatus: 200, // For older browsers
 };
+
+// Apply CORS middleware
 app.use(cors(corsOptions));
+
 
 //helmet
 app.use(helmet());
