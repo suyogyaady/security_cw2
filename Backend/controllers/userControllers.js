@@ -8,10 +8,43 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const path = require("path");
 const axios = require("axios");
 const fs = require("fs");
-const crypto = require("crypto"); // To generate OTP
+const crypto = require("crypto");
+
 const nodemailer = require("nodemailer"); // For sending emails
 
 const validator = require("validator"); // For validation and sanitation
+
+// Encryption setup
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY; // 32-byte key (must be stored securely)
+const IV_LENGTH = 16; // Initialization vector size
+
+// Function to encrypt data
+const encryptData = (data) => {
+  if (!data) return null;
+  const iv = crypto.randomBytes(IV_LENGTH);
+  const cipher = crypto.createCipheriv(
+    "aes-256-cbc",
+    Buffer.from(ENCRYPTION_KEY, "hex"),
+    iv
+  );
+  let encrypted = cipher.update(data, "utf8", "hex");
+  encrypted += cipher.final("hex");
+  return `${iv.toString("hex")}:${encrypted}`; // Store IV with encrypted data
+};
+
+// Function to decrypt data
+const decryptData = (encryptedData) => {
+  if (!encryptedData) return null;
+  const [iv, encrypted] = encryptedData.split(":");
+  const decipher = crypto.createDecipheriv(
+    "aes-256-cbc",
+    Buffer.from(ENCRYPTION_KEY, "hex"),
+    Buffer.from(iv, "hex")
+  );
+  let decrypted = decipher.update(encrypted, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+  return decrypted;
+};
 
 const createUser = async (req, res) => {
   try {
@@ -69,9 +102,10 @@ const createUser = async (req, res) => {
       });
     }
 
-    const existingUser = await userModel.findOne({
-      email: validator.escape(email),
-    });
+    const encryptedEmail = encryptData(validator.escape(email));
+    const encryptedPhone = encryptData(validator.escape(phoneNumber));
+
+    const existingUser = await userModel.findOne({ email: encryptedEmail });
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -84,10 +118,10 @@ const createUser = async (req, res) => {
 
     const newUser = new userModel({
       fullName: validator.escape(fullName),
-      phoneNumber: validator.escape(phoneNumber),
-      email: validator.normalizeEmail(email),
+      phoneNumber: encryptedPhone, // Store encrypted phone number
+      email: encryptedEmail, // Store encrypted email
       password: hashedPassword,
-      passwordHistory: [hashedPassword], // Initialize password history with the first password
+      passwordHistory: [hashedPassword], // Initialize password history
     });
 
     await newUser.save();
@@ -98,6 +132,40 @@ const createUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Error during user registration:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+// Function to retrieve user details with decryption
+const getUserDetails = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await userModel.findById(userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found!",
+      });
+    }
+
+    // Decrypt email and phone number
+    const decryptedEmail = decryptData(user.email);
+    const decryptedPhone = decryptData(user.phoneNumber);
+
+    res.status(200).json({
+      success: true,
+      user: {
+        fullName: user.fullName,
+        email: decryptedEmail,
+        phoneNumber: decryptedPhone,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user details:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -801,4 +869,5 @@ module.exports = {
   resetPasswordByEmail,
   googleLogin,
   getUserByGoogleEmail,
+  getUserDetails,
 };

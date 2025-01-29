@@ -4,10 +4,8 @@ const User = require("../models/userModel");
 const authGuard = async (req, res, next) => {
   // check incoming data
   console.log(req.headers); //pass
-
   // get authorization data from headers
   const authHeader = req.headers.authorization;
-
   // check or validate
   if (!authHeader) {
     return res.status(400).json({
@@ -15,10 +13,8 @@ const authGuard = async (req, res, next) => {
       message: "Auth header is missing",
     });
   }
-
   // Split the data (Format : 'Bearer token-joyboy') -> only token
   const token = authHeader.split(" ")[1];
-
   // if token is not found : stop the process (res)
   if (!token || token === "") {
     return res.status(400).json({
@@ -26,7 +22,6 @@ const authGuard = async (req, res, next) => {
       message: "Please provide a token",
     });
   }
-
   // if token is found then verify
   try {
     const decodeUserData = jwt.verify(token, process.env.JWT_SECRET);
@@ -38,7 +33,6 @@ const authGuard = async (req, res, next) => {
       email: user.email,
       isAdmin: user.isAdmin,
     };
-
     next();
   } catch (error) {
     console.log(error);
@@ -47,30 +41,21 @@ const authGuard = async (req, res, next) => {
       message: "Not Authenticated",
     });
   }
-
-  // if verified : next (function in controller)
-  // if not verified : not auth
+  // if verified : next (function in controller) // if not verified : not auth
 };
 
 // Admin Guard
 const adminGuard = async (req, res, next) => {
-  // check incoming data
-  console.log(req.headers); //pass
-
-  // get authorization data from headers
+  console.log(req.headers);
   const authHeader = req.headers.authorization;
-
-  // check or validate
   if (!authHeader) {
     return res.status(400).json({
       success: false,
       message: "Auth header is missing",
     });
   }
-
   // Split the data (Format : 'Bearer token-joyboy') -> only token
   const token = authHeader.split(" ")[1];
-
   // if token is not found : stop the process (res)
   if (!token || token === "") {
     return res.status(400).json({
@@ -78,7 +63,6 @@ const adminGuard = async (req, res, next) => {
       message: "Please provide a token",
     });
   }
-
   // if token is found then verify
   try {
     const decodeUserData = jwt.verify(token, process.env.JWT_SECRET);
@@ -91,7 +75,6 @@ const adminGuard = async (req, res, next) => {
       email: user.email,
       isAdmin: user.isAdmin,
     };
-
     if (!req.user.isAdmin) {
       return res.status(400).json({
         success: false,
@@ -106,9 +89,7 @@ const adminGuard = async (req, res, next) => {
       message: "Not Authenticated",
     });
   }
-
-  // if verified : next (function in controller)
-  // if not verified : not auth
+  // if verified : next (function in controller),  // if not verified : not auth
 };
 
 module.exports = {

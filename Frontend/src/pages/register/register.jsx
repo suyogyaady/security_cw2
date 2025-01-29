@@ -38,42 +38,42 @@ const Register = () => {
     }
   };
 
-   const commonPasswords = [
-     "password",
-     "123456",
-     "12345678",
-     "qwerty",
-     "abc123",
-     "111111",
-     "password1",
-     "123123",
-     "letmein",
-     "welcome",
-   ];
+  const commonPasswords = [
+    "password",
+    "123456",
+    "12345678",
+    "qwerty",
+    "abc123",
+    "111111",
+    "password1",
+    "123123",
+    "letmein",
+    "welcome",
+  ];
 
-   const validatePassword = (password) => {
-     if (password.length < 8)
-       return "Password must be at least 8 characters long.";
-     if (!/[A-Z]/.test(password))
-       return "Password must contain at least one uppercase letter.";
-     if (!/[a-z]/.test(password))
-       return "Password must contain at least one lowercase letter.";
-     if (!/[0-9]/.test(password))
-       return "Password must contain at least one number.";
-     if (!/[!@#$%^&*()\-_=+[\]{};:'",.<>?/|`~]/.test(password))
-       return "Password must contain at least one special character.";
-     if (/\s/.test(password)) return "Password must not contain spaces.";
-     if (commonPasswords.includes(password.toLowerCase()))
-       return "Password is too common, choose a stronger one.";
-     if (/(\d)\1\1/.test(password))
-       return "Password must not have repeated numbers (e.g., 111, 999).";
-     if (/([a-zA-Z])\1\1/.test(password))
-       return "Password must not have repeated letters (e.g., aaa, bbb).";
-     if (/1234|abcd|qwerty|password/i.test(password))
-       return "Password must not contain common sequences (e.g., 1234, qwerty).";
+  const validatePassword = (password) => {
+    if (password.length < 8)
+      return "Password must be at least 8 characters long.";
+    if (!/[A-Z]/.test(password))
+      return "Password must contain at least one uppercase letter.";
+    if (!/[a-z]/.test(password))
+      return "Password must contain at least one lowercase letter.";
+    if (!/[0-9]/.test(password))
+      return "Password must contain at least one number.";
+    if (!/[!@#$%^&*()\-_=+[\]{};:'",.<>?/|`~]/.test(password))
+      return "Password must contain at least one special character.";
+    if (/\s/.test(password)) return "Password must not contain spaces.";
+    if (commonPasswords.includes(password.toLowerCase()))
+      return "Password is too common, choose a stronger one.";
+    if (/(\d)\1\1/.test(password))
+      return "Password must not have repeated numbers (e.g., 111, 999).";
+    if (/([a-zA-Z])\1\1/.test(password))
+      return "Password must not have repeated letters (e.g., aaa, bbb).";
+    if (/1234|abcd|qwerty|password/i.test(password))
+      return "Password must not contain common sequences (e.g., 1234, qwerty).";
 
-     return null;
-   };
+    return null;
+  };
 
   const validate = () => {
     let newErrors = {};
