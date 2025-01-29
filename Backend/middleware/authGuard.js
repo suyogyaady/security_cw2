@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
-const authGuard = (req, res, next) => {
+const authGuard = async (req, res, next) => {
   // check incoming data
   console.log(req.headers); //pass
 
@@ -31,6 +31,14 @@ const authGuard = (req, res, next) => {
   try {
     const decodeUserData = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decodeUserData;
+    const user = await User.findById(decodeUserData.id).select("-password");
+    req.user = {
+      id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      isAdmin: user.isAdmin,
+    };
+
     next();
   } catch (error) {
     console.log(error);
@@ -45,7 +53,7 @@ const authGuard = (req, res, next) => {
 };
 
 // Admin Guard
-const adminGuard = (req, res, next) => {
+const adminGuard = async (req, res, next) => {
   // check incoming data
   console.log(req.headers); //pass
 
@@ -75,6 +83,15 @@ const adminGuard = (req, res, next) => {
   try {
     const decodeUserData = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decodeUserData; // id, is admin
+
+    const user = await User.findById(decodeUserData.id).select("-password");
+    req.user = {
+      id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      isAdmin: user.isAdmin,
+    };
+
     if (!req.user.isAdmin) {
       return res.status(400).json({
         success: false,
@@ -94,10 +111,7 @@ const adminGuard = (req, res, next) => {
   // if not verified : not auth
 };
 
-
-
 module.exports = {
   authGuard,
   adminGuard,
-  
 };

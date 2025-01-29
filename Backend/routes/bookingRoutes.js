@@ -1,17 +1,27 @@
 const express = require("express");
 const router = express.Router();
 const bookingController = require("../controllers/bookingController");
-const { authGuard } = require("../middleware/authGuard");
+const { authGuard, adminGuard } = require("../middleware/authGuard");
 const { logRequest } = require("../middleware/activityLogs");
 
 // Route to add item to booking
-router.post("/add", authGuard, bookingController.addToBooking);
+router.post("/add", authGuard, logRequest, bookingController.addToBooking);
 
 // Route to get all booking items
-router.get("/all", bookingController.getAllBookingItems);
+router.get(
+  "/all",
+  adminGuard,
+  logRequest,
+  bookingController.getAllBookingItems
+);
 
 // Route to delete item from booking
-router.delete("/delete/:id", bookingController.deleteBookingItem);
+router.delete(
+  "/delete/:id",
+  authGuard,
+  logRequest,
+  bookingController.deleteBookingItem
+);
 
 // Route to get user-specific booking items
 router.get(

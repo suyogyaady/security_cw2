@@ -6,12 +6,12 @@ const logRequest = async (req, res, next) => {
       : "Unknown User",
     url: req.originalUrl,
     method: req.method,
-    role: req.user?.role || "User", // Dynamically set role
+    role: req.user?.role || "User",
     status: res.statusCode,
     time: new Date(),
-    headers: req.headers, // Include headers
-    device: req.headers["user-agent"], // Include device information
-    ipAddress: req.ip, // Include IP address
+    headers: req.headers,
+    device: req.headers["user-agent"],
+    ipAddress: req.ip,
   });
 
   try {

@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const userController = require("../controllers/userControllers");
-const { authGuard } = require("../middleware/authGuard");
+const { authGuard, adminGuard } = require("../middleware/authGuard");
 // importing log request
 const { logRequest } = require("../middleware/activityLogs");
 
@@ -21,8 +21,9 @@ router.post("/reset_password", userController.resetPassword);
 // Get Current User Profile
 router.get(
   "/current_profile",
-  logRequest,
+
   authGuard,
+  logRequest,
   userController.getCurrentProfile
 );
 
@@ -38,16 +39,16 @@ router.put(
 );
 
 // Get all User
-router.get("/get_all_user", userController.getAllUser);
+router.get("/get_all_user", adminGuard, logRequest, userController.getAllUser);
 
 // Forgot Password
-router.post("/forgot/email", userController.forgotPasswordByEmail);
+router.post("/forgot/email", logRequest, userController.forgotPasswordByEmail);
 
 // Reset Password
-router.post("/reset/email", userController.resetPasswordByEmail);
+router.post("/reset/email", logRequest, userController.resetPasswordByEmail);
 
 // Route to handle google login
-router.post("/google", userController.googleLogin);
-router.post("/getGoogleUser", userController.getUserByGoogleEmail);
+router.post("/google", logRequest, userController.googleLogin);
+router.post("/getGoogleUser", logRequest, userController.getUserByGoogleEmail);
 
 module.exports = router;
