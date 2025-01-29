@@ -8,6 +8,7 @@ const path = require("path");
 const fs = require("fs");
 const helmet = require("helmet");
 const https = require("https");
+const session = require("express-session");
 const mongoSanitize = require("express-mongo-sanitize");
 const xssClean = require("xss-clean");
 
@@ -15,6 +16,21 @@ const xssClean = require("xss-clean");
 
 // Creating an express app
 const app = express();
+
+// Configuring session
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      httpOnly: false, // Prevents JavaScript access to cookies
+      sameSite: "strict", // Protects against CSRF
+      maxAge: 1000 * 60 * 60 * 24 * 10, // 10 days
+    },
+  })
+);
 
 // Configure CORS policy
 const corsOptions = {
@@ -34,7 +50,6 @@ const corsOptions = {
 
 // Apply CORS middleware
 app.use(cors(corsOptions));
-
 
 //helmet
 app.use(helmet());
