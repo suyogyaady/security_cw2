@@ -53,6 +53,8 @@ export const getCurrentUserApi = (id) =>
 // Get all users API
 export const getAllUsersApi = () => Api.get("/api/user/get_all_user", config);
 
+
+
 // =============================== BIKE API ===========================================
 // create bike API
 export const createBikeApi = (data) =>
