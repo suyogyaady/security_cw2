@@ -507,7 +507,7 @@ const forgotPasswordByEmail = async (req, res) => {
 
     // Construct reset link
     // const resetLink = `http://localhost:5000/api/user/reset?token=${token}&email=${userEmail}`;
-    const resetLink = `http://192.168.18.7:5000/api/user/reset?token=${token}&email=${userEmail}`;
+    const resetLink = `https://192.168.18.7:5000/api/user/reset?token=${token}&email=${userEmail}`;
 
     // send email
     const emailSent = await sendEmail(userEmail, resetLink);
