@@ -20,7 +20,7 @@ const rateLimit = require("express-rate-limit");
 // Define a rate limit
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 2,
+  max: 200,
   message: {
     status: "fail",
     message:
@@ -69,7 +69,17 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Security Middlewares
-app.use(helmet()); // Sets security-related HTTP headers
+app.use(
+  helmet(
+    // Allow static folder
+    {
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+      crossOriginOpenerPolicy: false,
+      crossOriginResourcePolicy: false,
+    }
+  )
+); // Sets security-related HTTP headers
 app.use(mongoSanitize()); // Prevents NoSQL injections
 app.use(xssClean()); // Prevents XSS attacks
 
