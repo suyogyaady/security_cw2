@@ -300,8 +300,6 @@ const loginUser = async (req, res) => {
   }
 };
 
-// Forgot password by using phonenumber
-
 const verifyOTP = async (req, res) => {
   const { email, otp } = req.body;
 
@@ -335,6 +333,13 @@ const verifyOTP = async (req, res) => {
     user.googleOTPExpiry = null;
     await user.save();
 
+    // Store user session
+    req.session.user = {
+      id: user._id,
+      email: user.email,
+      isAdmin: user.isAdmin,
+    };
+
     // Generate token
     const token = await jwt.sign(
       { id: user._id, isAdmin: user.isAdmin },
@@ -345,6 +350,7 @@ const verifyOTP = async (req, res) => {
       success: true,
       message: "OTP verified successfully.",
       token: token,
+
       user: {
         id: user._id,
         fullName: user.fullName,
