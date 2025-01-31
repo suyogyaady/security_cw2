@@ -35,10 +35,7 @@ const userSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
-  passwordLastUpdated: {
-    type: Date,
-    default: Date.now,
-  },
+
   googleOTP: {
     type: String,
     default: null,

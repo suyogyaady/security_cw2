@@ -38,9 +38,13 @@ export const verifyotpApi = (data) => Api.post("/api/user/verify_otp", data);
 export const forgotPasswordApi = (data) =>
   Api.post("/api/user/forgot_password", data);
 
+//forgot password by email
+export const forgotPasswordByEmailApi = (data) =>
+  Api.post("/api/user/forgot/email", data);
+
 // Reset Password API
 export const resetPasswordApi = (data) =>
-  Api.post("/api/user/reset_password", data);
+  Api.post("/api/user/reset/email", data);
 
 // Update Profile API
 export const updateProfileApi = (data) =>
@@ -52,8 +56,6 @@ export const getCurrentUserApi = (id) =>
 
 // Get all users API
 export const getAllUsersApi = () => Api.get("/api/user/get_all_user", config);
-
-
 
 // =============================== BIKE API ===========================================
 // create bike API
