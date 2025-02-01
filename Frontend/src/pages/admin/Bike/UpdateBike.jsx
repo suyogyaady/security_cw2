@@ -141,7 +141,7 @@ const UpdateBike = () => {
                 />
               ) : (
                 <img
-                  src={`http://localhost:5000/bikes/${oldImage}`}
+                  src={`https://localhost:5000/bikes/${oldImage}`}
                   className='object-cover rounded-lg w-full h-96'
                   alt='Old Bike'
                 />

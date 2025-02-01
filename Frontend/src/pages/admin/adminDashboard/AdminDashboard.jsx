@@ -193,7 +193,7 @@ const Dashboard = () => {
                       className='hover:bg-gray-600 transition-colors duration-200'>
                       <td className='py-2 px-4'>
                         <img
-                          src={`http://localhost:5000/bikes/${bike.bikeImage}`}
+                          src={`https://localhost:5000/bikes/${bike.bikeImage}`}
                           alt={bike.bikeName}
                           className='w-12 h-12 object-cover rounded'
                         />

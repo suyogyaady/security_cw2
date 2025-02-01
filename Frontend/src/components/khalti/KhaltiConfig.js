@@ -5,7 +5,7 @@ let config = {
   publicKey: myKey.publicTestKey,
   productIdentity: '1234567890',
   productName: 'Furniture Fusion',
-  productUrl: 'http://localhost:3000',
+  productUrl: 'https://localhost:3000',
   eventHandler: {
     onSuccess(payload) {
       console.log('payload', payload);
@@ -19,7 +19,7 @@ let config = {
       };
 
       axios
-        .post('http://localhost:5000/api/payment/verify-payment', data, config)
+        .post('https://localhost:5000/api/payment/verify-payment', data, config)
         .then((response) => {
           console.log(response.data);
         })

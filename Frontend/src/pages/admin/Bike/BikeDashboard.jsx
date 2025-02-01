@@ -138,7 +138,7 @@ const BikeDashboard = () => {
                 className='border-t border-gray-700 hover:bg-gray-750 transition duration-200'>
                 <td className='py-3 px-4'>
                   <img
-                    src={`http://localhost:5000/bikes/${bike.bikeImage}`}
+                    src={`https://localhost:5000/bikes/${bike.bikeImage}`}
                     alt={bike.bikeName}
                     className='w-16 h-16 object-cover rounded'
                   />

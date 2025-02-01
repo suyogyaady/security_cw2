@@ -100,14 +100,15 @@ export const addToBookingApi = (data) =>
 export const getAllBookingApi = () => Api.get("/api/booking/all", config);
 
 // Delete Booking
-export const deleteBookingApi = (id) => Api.delete(`/api/booking/delete/${id}`);
+export const deleteBookingApi = (id) =>
+  Api.delete(`/api/booking/delete/${id}`, config);
 
 // User Booking
 export const userBookingApi = (id) =>
   Api.get(`/api/booking/userBooking`, config);
 
 export const cancelBookingApi = (id) => {
-  return axios.put(`/api/booking/cancel/${id}`, config);
+  return Api.put(`/api/booking/cancel/${id}`, jsonConfig);
 };
 
 // ============================= Admin Panel ===========================================

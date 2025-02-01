@@ -102,10 +102,9 @@ const createUser = async (req, res) => {
       });
     }
 
-    const encryptedEmail = encryptData(validator.escape(email));
     const encryptedPhone = encryptData(validator.escape(phoneNumber));
 
-    const existingUser = await userModel.findOne({ email: encryptedEmail });
+    const existingUser = await userModel.findOne({ email: email });
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -119,7 +118,7 @@ const createUser = async (req, res) => {
     const newUser = new userModel({
       fullName: validator.escape(fullName),
       phoneNumber: encryptedPhone, // Store encrypted phone number
-      email: encryptedEmail, // Store encrypted email
+      email: email, // Store encrypted email
       password: hashedPassword,
       passwordHistory: [hashedPassword], // Initialize password history
     });

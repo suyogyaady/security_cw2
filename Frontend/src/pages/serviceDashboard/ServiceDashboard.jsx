@@ -287,7 +287,7 @@ const ServiceDashboard = () => {
               <tr>
                 <td>
                   <img
-                    src={`http://localhost:5000/services/${service.serviceImage}`}
+                    src={`https://localhost:5000/services/${service.serviceImage}`}
                     alt={service.serviceName}
                     width='50px'
                   />

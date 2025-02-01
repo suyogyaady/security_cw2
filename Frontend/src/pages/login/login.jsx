@@ -234,6 +234,7 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
+          
           <div className="relative">
             <FaLock className="absolute top-3 left-3 text-gray-400" />
             <input
